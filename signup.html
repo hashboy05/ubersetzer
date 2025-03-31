@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a, #0f172a);
+            min-height: 100vh;
+        }
+
+        .custom-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1em;
+        }
+
+        body {
+            color: #e2e8f0;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#0ea5e9'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="gradient-bg">
+<div class="container mx-auto px-4 py-8 min-h-screen">
+    <nav class="bg-gray-800/90 backdrop-blur-sm shadow-lg rounded-xl mb-8 p-4">
+        <div class="flex items-center justify-between">
+            <a href="#" class="font-['Pacifico'] text-2xl text-primary">übersetzer</a>
+            <div class="flex gap-4">
+                <a href="main_menu.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Translate</a>
+                <a href="login.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Login</a>
+                <a href="signup.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Sign Up</a>
+                <a href="settings.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Settings</a>
+            </div>
+        </div>
+    </nav>
+    <div class="page-content bg-gray-800/90 backdrop-blur-sm p-8 rounded-xl shadow-lg max-w-md mx-auto">
+        <h2 class="text-2xl font-semibold text-gray-200 mb-6">Sign Up</h2>
+        <form id="signup-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                <input type="text" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                <input type="email" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                <input type="password" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
+            </div>
+            <button type="submit" class="w-full bg-primary text-white py-3 !rounded-button hover:bg-primary/90 transition-colors cursor-pointer">Sign Up</button>
+            <p class="text-center text-gray-400">Already have an account? <a href="login.html" class="text-primary hover:underline cursor-pointer">Login</a></p>
+        </form>
+    </div>
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const successMessage = document.createElement('div');
+            successMessage.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg';
+            successMessage.textContent = 'Success!';
+            document.body.appendChild(successMessage);
+            setTimeout(() => successMessage.remove(), 3000);
+        });
+    </script>
+</div>
+</body>
+</html>
