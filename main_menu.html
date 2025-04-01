@@ -70,72 +70,135 @@
     <div class="page-content bg-gray-800/90 backdrop-blur-sm p-8 rounded-xl shadow-lg">
         <div class="flex items-center gap-4 mb-6">
             <div class="flex-1">
-                <select class="custom-select w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-gray-200">
+                <select id="sourceLang" class="custom-select w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-gray-200" onchange="toggleMicButton()">
+                    <option value="auto">Auto Detect</option>
+                    <option value="sq">Albanian</option>
+                    <option value="ar">Arabic</option>
+                    <option value="az">Azerbaijani</option>
+                    <option value="bn">Bengali</option>
+                    <option value="bg">Bulgarian</option>
+                    <option value="ca">Catalan</option>
+                    <option value="zh-CN">Chinese Simplified</option>
+                    <option value="zh-TW">Chinese Traditional</option>
+                    <option value="hr">Croatian</option>
+                    <option value="cs">Czech</option>
+                    <option value="da">Danish</option>
+                    <option value="nl">Dutch</option>
                     <option value="en">English</option>
-                    <option value="es">Spanish</option>
+                    <option value="et">Estonian</option>
+                    <option value="fi">Finnish</option>
                     <option value="fr">French</option>
                     <option value="de">German</option>
-                    <option value="zh-CN">Chinese (Simplified)</option>
-                    <option value="zh-TW">Chinese (Traditional)</option>
-                    <option value="ar">Arabic</option>
-                    <option value="pt">Portuguese</option>
-                    <option value="ru">Russian</option>
+                    <option value="el">Greek</option>
+                    <option value="he">Hebrew</option>
+                    <option value="hi">Hindi</option>
+                    <option value="hu">Hungarian</option>
+                    <option value="is">Icelandic</option>
+                    <option value="id">Indonesian</option>
+                    <option value="it">Italian</option>
                     <option value="ja">Japanese</option>
                     <option value="ko">Korean</option>
-                    <option value="it">Italian</option>
-                    <option value="nl">Dutch</option>
-                    <option value="sv">Swedish</option>
-                    <option value="fi">Finnish</option>
-                    <option value="da">Danish</option>
-                    <option value="no">Norwegian Bokmål</option>
+                    <option value="lv">Latvian</option>
+                    <option value="lt">Lithuanian</option>
+                    <option value="mk">Macedonian</option>
+                    <option value="ms">Malay</option>
+                    <option value="mt">Maltese</option>
+                    <option value="no">Norwegian</option>
+                    <option value="fa">Persian</option>
                     <option value="pl">Polish</option>
-                    <option value="hu">Hungarian</option>
+                    <option value="pt">Portuguese</option>
                     <option value="ro">Romanian</option>
-                    <option value="hi">Hindi</option>
+                    <option value="ru">Russian</option>
+                    <option value="sr">Serbian</option>
+                    <option value="sk">Slovak</option>
+                    <option value="sl">Slovenian</option>
+                    <option value="es">Spanish</option>
+                    <option value="sw">Swahili</option>
+                    <option value="sv">Swedish</option>
+                    <option value="th">Thai</option>
+                    <option value="tr">Turkish</option>
+                    <option value="uk">Ukrainian</option>
                     <option value="ur">Urdu</option>
+                    <option value="vi">Vietnamese</option>
+                    <option value="cy">Welsh</option>
                 </select>
             </div>
-            <button class="swap-btn p-2 rounded-full hover:bg-gray-700 cursor-pointer">
+            <button id="swapButton" onclick="swapLanguages()" class="swap-btn p-2 rounded-full hover:bg-gray-700 cursor-pointer">
                 <i class="ri-arrow-left-right-line text-xl text-gray-300"></i>
             </button>
             <div class="flex-1">
-                <select class="custom-select w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-gray-200">
-                    <option value="es">Spanish</option>
+                <select id="targetLang" class="custom-select w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-gray-200">
+                    <option value="ar">Arabic</option>
+                    <option value="az">Azerbaijani</option>
+                    <option value="bn">Bengali</option>
+                    <option value="bg">Bulgarian</option>
+                    <option value="ca">Catalan</option>
+                    <option value="zh-CN">Chinese Simplified</option>
+                    <option value="zh-TW">Chinese Traditional</option>
+                    <option value="hr">Croatian</option>
+                    <option value="cs">Czech</option>
+                    <option value="da">Danish</option>
+                    <option value="nl">Dutch</option>
                     <option value="en">English</option>
+                    <option value="et">Estonian</option>
+                    <option value="fi">Finnish</option>
                     <option value="fr">French</option>
                     <option value="de">German</option>
-                    <option value="zh-CN">Chinese (Simplified)</option>
-                    <option value="zh-TW">Chinese (Traditional)</option>
-                    <option value="ar">Arabic</option>
-                    <option value="pt">Portuguese</option>
-                    <option value="ru">Russian</option>
+                    <option value="el">Greek</option>
+                    <option value="he">Hebrew</option>
+                    <option value="hi">Hindi</option>
+                    <option value="hu">Hungarian</option>
+                    <option value="is">Icelandic</option>
+                    <option value="id">Indonesian</option>
+                    <option value="it">Italian</option>
                     <option value="ja">Japanese</option>
                     <option value="ko">Korean</option>
-                    <option value="it">Italian</option>
-                    <option value="nl">Dutch</option>
-                    <option value="sv">Swedish</option>
-                    <option value="fi">Finnish</option>
-                    <option value="da">Danish</option>
-                    <option value="no">Norwegian Bokmål</option>
+                    <option value="lv">Latvian</option>
+                    <option value="lt">Lithuanian</option>
+                    <option value="mk">Macedonian</option>
+                    <option value="ms">Malay</option>
+                    <option value="mt">Maltese</option>
+                    <option value="no">Norwegian</option>
+                    <option value="fa">Persian</option>
                     <option value="pl">Polish</option>
-                    <option value="hu">Hungarian</option>
+                    <option value="pt">Portuguese</option>
                     <option value="ro">Romanian</option>
-                    <option value="hi">Hindi</option>
+                    <option value="ru">Russian</option>
+                    <option value="sr">Serbian</option>
+                    <option value="sk">Slovak</option>
+                    <option value="sl">Slovenian</option>
+                    <option value="es">Spanish</option>
+                    <option value="sw">Swahili</option>
+                    <option value="sv">Swedish</option>
+                    <option value="th">Thai</option>
+                    <option value="tr">Turkish</option>
+                    <option value="uk">Ukrainian</option>
                     <option value="ur">Urdu</option>
+                    <option value="vi">Vietnamese</option>
+                    <option value="cy">Welsh</option>
                 </select>
             </div>
         </div>
         <div class="space-y-6">
             <div class="relative">
-                <textarea class="w-full h-40 p-4 bg-gray-700 border border-gray-600 rounded-xl resize-none focus:outline-none focus:border-primary text-gray-200" placeholder="Enter text to translate"></textarea>
-                <button class="absolute bottom-4 right-4 p-2 rounded-full hover:bg-gray-600 cursor-pointer">
+                <textarea id="sourceText" class="w-full h-40 p-4 bg-gray-700 border border-gray-600 rounded-xl resize-none focus:outline-none focus:border-primary text-gray-200" placeholder="Enter text to translate"></textarea>
+                <button id="micButton" onclick="startRecognition()" class="absolute bottom-4 right-12 p-2 rounded-full hover:bg-gray-600 cursor-pointer">
                     <i class="ri-mic-line text-xl text-gray-300"></i>
+                </button>
+                <button onclick="clearText()" class="absolute bottom-30 right-4 p-2 rounded-full hover:bg-gray-600 cursor-pointer">
+                    <i class="ri-close-line text-xl text-gray-300"></i>
+                </button>
+                <button id="stopButton" onclick="stopRecognition()" class="absolute bottom-4 right-4 p-2 rounded-full hover:bg-gray-600 cursor-pointer">
+                    <i class="ri-stop-circle-line text-xl text-gray-300"></i>
                 </button>
             </div>
             <div class="relative">
-                <textarea class="w-full h-40 p-4 bg-gray-800 border border-gray-600 rounded-xl resize-none focus:outline-none text-gray-200" placeholder="Translation" readonly></textarea>
-                <button class="absolute bottom-4 right-4 p-2 rounded-full hover:bg-gray-600 cursor-pointer">
+                <textarea id="translatedText" class="w-full h-40 p-4 bg-gray-800 border border-gray-600 rounded-xl resize-none focus:outline-none text-gray-200" placeholder="Translation" readonly></textarea>
+                <button onclick="readTranslation()" class="absolute bottom-4 right-12 p-2 rounded-full hover:bg-gray-600 cursor-pointer">
                     <i class="ri-volume-up-line text-xl text-gray-300"></i>
+                </button>
+                <button onclick="copyTranslation()" class="absolute bottom-4 right-4 p-2 rounded-full hover:bg-gray-600 cursor-pointer">
+                    <i class="ri-file-copy-line text-xl text-gray-300"></i>
                 </button>
             </div>
         </div>
@@ -160,7 +223,29 @@
         });
 
         showPage('translate');
+
+        //if the input language is auto detect, then the voice input won't be available, otherwise it will be
+        function toggleMicButton() {
+            const sourceLang = document.getElementById('sourceLang').value;
+            const micButton = document.getElementById('micButton');
+            const stopButton = document.getElementById('stopButton');
+            const swapButton = document.getElementById('swapButton');
+
+            if (sourceLang === 'auto') {
+                micButton.style.display = 'none';
+                stopButton.style.display = 'none';
+                swapButton.style.display = 'none';
+            } else {
+                micButton.style.display = 'block';
+                stopButton.style.display = 'block';
+                swapButton.style.display = 'block';
+            }
+        }
+
+        // Call it on page load to set initial state
+        window.onload = toggleMicButton;
     </script>
+    <script src="main_menu.js"></script>
 </div>
 </body>
 </html>
