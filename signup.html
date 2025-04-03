@@ -59,10 +59,7 @@
         <div class="flex items-center justify-between">
             <a href="#" class="font-['Pacifico'] text-2xl text-primary">übersetzer</a>
             <div class="flex gap-4">
-                <a href="main_menu.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Translate</a>
                 <a href="login.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Login</a>
-                <a href="signup.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Sign Up</a>
-                <a href="settings.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Settings</a>
             </div>
         </div>
     </nav>
@@ -71,17 +68,17 @@
         <form id="signup-form" class="space-y-4">
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
-                <input type="text" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
+                <input type="text" id="username" name="username" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-1">Email</label>
-                <input type="email" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
+                <input type="email" id="email" name="email" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
-                <input type="password" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
+                <input type="password" id="password" name="password" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
             </div>
-            <button type="submit" class="w-full bg-primary text-white py-3 !rounded-button hover:bg-primary/90 transition-colors cursor-pointer">Sign Up</button>
+            <button type="submit" id="signUpUser" class="w-full bg-primary text-white py-3 !rounded-button hover:bg-primary/90 transition-colors cursor-pointer">Sign Up</button>
             <p class="text-center text-gray-400">Already have an account? <a href="login.html" class="text-primary hover:underline cursor-pointer">Login</a></p>
         </form>
     </div>
@@ -98,3 +95,41 @@
 </div>
 </body>
 </html>
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getFirestore, setDoc, addDoc, doc, collection, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdKTr-ahasjXtJ00tnWiC5nLlX4XeO8lk",
+      authDomain: "ubersetzer-2c32a.firebaseapp.com",
+      projectId: "ubersetzer-2c32a",
+      storageBucket: "ubersetzer-2c32a.firebasestorage.app",
+      messagingSenderId: "948107684665",
+      appId: "1:948107684665:web:6495565ecab6df2b9b16e8",
+      measurementId: "G-EBCPHND0TL"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    // Initialize Cloud Firestore and get a reference to the service
+    const db = getFirestore(app);
+
+    signUpUser.addEventListener('click', (e) => {
+
+        var name = document.getElementById('username').value;
+        var email = document.getElementById('email').value;
+        var password = document.getElementById('password').value;
+        addDoc(collection(db, "User"), {
+            name: name,
+            email: email,
+            password: password
+        });
+    })
+</script>

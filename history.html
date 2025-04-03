@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>übersetzer - Translation History</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a, #0f172a);
+            min-height: 100vh;
+        }
+
+        body {
+            color: #e2e8f0;
+        }
+
+        .history-row {
+            background-color: #1f2937; /* Dark gray background for rows */
+            border: 1px solid #374151; /* Slightly lighter border */
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .history-row h3 {
+            font-size: 1.25rem;
+            color: #3b82f6; /* Primary color */
+        }
+
+        .history-row p {
+            font-size: 1rem;
+            color: #e2e8f0; /* Text color */
+        }
+    </style>
+    <script>
+        // Check if user is logged in
+        const loggedInUser = localStorage.getItem("username");
+        if (!loggedInUser) {
+            window.location.href = "login.html";
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem("username");
+            window.location.href = "login.html";
+        }
+    </script>
+</head>
+<body class="gradient-bg">
+<div class="container mx-auto px-4 py-8 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-gray-800/90 backdrop-blur-sm shadow-lg rounded-xl mb-8 p-4">
+        <div class="flex items-center justify-between">
+            <a href="#" class="font-['Pacifico'] text-2xl text-primary">übersetzer</a>
+            <div class="flex gap-4">
+                <a href="main_menu.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Translate</a>
+                <a href="settings.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Settings</a>
+                <button class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="page-content bg-gray-800/90 backdrop-blur-sm p-8 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-semibold text-gray-200 mb-6">Translation History</h2>
+
+        <!-- History Rows -->
+        <div id="history-container" class="space-y-4">
+            <!-- Rows will be dynamically added here -->
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+    
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDdKTr-ahasjXtJ00tnWiC5nLlX4XeO8lk",
+            authDomain: "ubersetzer-2c32a.firebaseapp.com",
+            projectId: "ubersetzer-2c32a",
+            storageBucket: "ubersetzer-2c32a.firebasestorage.app",
+            messagingSenderId: "948107684665",
+            appId: "1:948107684665:web:6495565ecab6df2b9b16e8",
+            measurementId: "G-EBCPHND0TL"
+        };
+    
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+    
+        // Initialize Cloud Firestore and get a reference to the service
+        const db = getFirestore(app);
+        async function fetchHistoryData() {
+            const historyContainer = document.getElementById('history-container');
+            historyContainer.innerHTML = '';
+    
+            try {
+                // Create a query to fetch all documents sorted by Timestamp
+                const timestampQuery = query(
+                    collection(db, "Translation History"),
+                    orderBy("Timestamp", "desc")
+                );
+
+                // Fetch documents matching the query
+                const querySnapshot = await getDocs(timestampQuery);
+
+                // Filter documents based on UserID
+                const userDocuments = querySnapshot.docs.filter((doc) => {
+                    const data = doc.data();
+                    return data.UserID === localStorage.getItem("username");
+                });
+
+                for (const userDoc of userDocuments) {
+                    // Extract data from each document in Translation History
+                    const data = userDoc.data();
+                    const sourceText = data.SourceText;
+                    const sourceLangId = data.SourceLang; // Document ID for Source Language
+                    const translatedText = data.TranslatedText;
+                    const translatedLangId = data.TranslatedLang; // Document ID for Translated Language
+                    const timestamp = data.Timestamp;
+
+                    // Format the timestamp
+                    const formattedDate = timestamp ? new Date(timestamp.seconds * 1000).toLocaleString() : 'N/A';
+
+                    // Query the Languages collection dynamically based on SourceLang and TranslatedLang IDs
+                    const sourceLangRef = doc(db, "Languages", sourceLangId);
+                    const sourceLangSnap = await getDoc(sourceLangRef);
+                    const sourceLangName = sourceLangSnap.exists() ? sourceLangSnap.data().Name : 'Unknown Language';
+
+                    const translatedLangRef = doc(db, "Languages", translatedLangId);
+                    const translatedLangSnap = await getDoc(translatedLangRef);
+                    const translatedLangName = translatedLangSnap.exists() ? translatedLangSnap.data().Name : 'Unknown Language';
+
+                    // Create a history row
+                    const historyRow = document.createElement('div');
+                    historyRow.className = 'history-row';
+                    historyRow.innerHTML = `
+                        <h3>Translated on: ${formattedDate}</h3>
+                        <p><strong>Input (${sourceLangName || 'N/A'}):</strong> ${sourceText || 'N/A'}</p>
+                        <p><strong>Output (${translatedLangName || 'N/A'}):</strong> ${translatedText || 'N/A'}</p>
+                    `;
+                    
+                    // Append the row to the container
+                    historyContainer.appendChild(historyRow);
+                }
+            } catch (e) {
+                console.error("Error fetching translation history:", e);
+                historyContainer.innerHTML = '<p>Error fetching translation history. Please try again later.</p>';
+            }
+        }
+        // Fetch data when the page loads
+        document.addEventListener('DOMContentLoaded', fetchHistoryData);
+    </script>
+</div>
+</body>
+</html>

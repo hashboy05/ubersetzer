@@ -59,10 +59,7 @@
         <div class="flex items-center justify-between">
             <a href="#" class="font-['Pacifico'] text-2xl text-primary">übersetzer</a>
             <div class="flex gap-4">
-                <a href="main_menu.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Translate</a>
-                <a href="login.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Login</a>
                 <a href="signup.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Sign Up</a>
-                <a href="settings.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Settings</a>
             </div>
         </div>
     </nav>
@@ -70,27 +67,74 @@
         <h2 class="text-2xl font-semibold text-gray-200 mb-6">Login</h2>
         <form id="login-form" class="space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
-                <input type="text" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
+                <label for="username" class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                <input type="text" id="username" name="username" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
-                <input type="password" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
+                <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                <input type="password" id="password" name="password" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
             </div>
-            <button type="submit" class="w-full bg-primary text-white py-3 !rounded-button hover:bg-primary/90 transition-colors cursor-pointer">Login</button>
+            <button type="submit" id="submitData" class="w-full bg-primary text-white py-3 !rounded-button hover:bg-primary/90 transition-colors cursor-pointer">Login</button>
             <p class="text-center text-gray-400">Don't have an account? <a href="signup.html" class="text-primary hover:underline cursor-pointer">Sign up</a></p>
         </form>
     </div>
-    <script>
-        document.getElementById('login-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const successMessage = document.createElement('div');
-            successMessage.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg';
-            successMessage.textContent = 'Success!';
-            document.body.appendChild(successMessage);
-            setTimeout(() => successMessage.remove(), 3000);
-        });
-    </script>
 </div>
 </body>
 </html>
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getFirestore, doc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdKTr-ahasjXtJ00tnWiC5nLlX4XeO8lk",
+      authDomain: "ubersetzer-2c32a.firebaseapp.com",
+      projectId: "ubersetzer-2c32a",
+      storageBucket: "ubersetzer-2c32a.firebasestorage.app",
+      messagingSenderId: "948107684665",
+      appId: "1:948107684665:web:6495565ecab6df2b9b16e8",
+      measurementId: "G-EBCPHND0TL"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    // Initialize Cloud Firestore and get a reference to the service
+    const db = getFirestore(app);
+
+    const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+      
+            const q = query(collection(db, "User"), where("name", "==", name), where("password", "==", password));
+      
+            try {
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    let userId;
+                    querySnapshot.forEach((doc) => {
+                        userId = doc.id; // Get the document ID (which is the user ID)
+                    });
+
+                    // Store the user ID in localStorage
+                    localStorage.setItem("username",userId);
+                    //user exists and credentials match
+                    window.location.href = "main_menu.html";
+                } else {
+                    //user not found or invalid credentials
+                    alert("Invalid username or password.");
+                }
+            } catch (error) {
+                console.error("Error during login:", error);
+                alert("Login failed. Please try again.");
+            }
+        });
+
+  </script>

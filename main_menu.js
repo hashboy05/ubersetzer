@@ -19,6 +19,7 @@ function startRecognition() {
         const transcript = event.results[0][0].transcript;
         document.getElementById('sourceText').value = transcript;
         console.log('You said:', transcript);
+        translateText();
     };
 
     recognition.onerror = function(event) {
@@ -36,45 +37,6 @@ function stopRecognition() {
     }
     translateText();
 }
-
-//for translating input text to output text
-async function translateText() {
-    const sourceText = document.getElementById('sourceText').value;
-    const sourceLang = document.getElementById('sourceLang').value;
-    const targetLang = document.getElementById('targetLang').value;
-    const translatedText = document.getElementById('translatedText');
-
-    if (!sourceText) {
-        translatedText.value = '';
-        return;
-    }
-
-    try {
-        const response = await fetch('http://localhost:5000/translate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                text: sourceText,
-                source_lang: sourceLang === 'auto' ? 'auto' : sourceLang,
-                target_lang: targetLang
-            })
-        });
-
-        const data = await response.json();
-        if (data.status === 'success') {
-            translatedText.value = data.translation;
-        } else {
-            throw new Error(data.error);
-        }
-    } catch (error) {
-        alert(`Translation failed: ${error.message}`);
-        translatedText.value = '';
-    }
-}
-
-window.onload = () => {
-    document.getElementById('sourceText').addEventListener('input', translateText);
-};
 
 //for swapping input and output languages
 function swapLanguages() {
@@ -103,25 +65,4 @@ function copyTranslation() {
 function clearText() {
     document.getElementById('sourceText').value = '';
     document.getElementById('translatedText').value = '';
-}
-
-//for reading out the translation, also useful for blind people
-function readTranslation() {
-    const translatedText = document.getElementById('translatedText').value;
-
-    if (!translatedText) {
-        alert('No translation available to read.');
-        return;
-    }
-
-    // Create a new speech synthesis utterance
-    const utterance = new SpeechSynthesisUtterance(translatedText);
-
-    // Set voice properties (optional)
-    utterance.lang = document.getElementById('targetLang').value; // Use the target language for speech
-    utterance.rate = 1; // Normal speaking rate
-    utterance.pitch = 1; // Normal pitch
-
-    // Speak the text
-    window.speechSynthesis.speak(utterance);
 }
