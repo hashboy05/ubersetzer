@@ -77,6 +77,10 @@
             <button type="submit" id="submitData" class="w-full bg-primary text-white py-3 !rounded-button hover:bg-primary/90 transition-colors cursor-pointer">Login</button>
             <p class="text-center text-gray-400">Don't have an account? <a href="signup.html" class="text-primary hover:underline cursor-pointer">Sign up</a></p>
         </form>
+        <!-- Google Sign-In Button -->
+        <button id="google-signin-btn" class="w-full bg-red-500 text-white py-3 mt-4 !rounded-button hover:bg-red-600 transition-colors cursor-pointer flex items-center justify-center gap-x-2">
+            <i class="ri-google-fill"></i> Continue with Google
+        </button>
     </div>
 </div>
 </body>
@@ -84,8 +88,9 @@
 <script type="module">
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getFirestore, doc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+    import { getFirestore, doc, getDocs, setDoc, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
   
@@ -106,6 +111,7 @@
     const analytics = getAnalytics(app);
     // Initialize Cloud Firestore and get a reference to the service
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
     const loginForm = document.getElementById('login-form');
         loginForm.addEventListener('submit', async (e) => {
@@ -136,5 +142,40 @@
                 alert("Login failed. Please try again.");
             }
         });
+
+    // Google Sign-In Button Click Event
+    const googleSignInBtn = document.getElementById('google-signin-btn');
+    googleSignInBtn.addEventListener('click', async () => {
+        const provider = new GoogleAuthProvider();
+        
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+
+            // Get user details
+            const displayName = user.displayName;
+            const email = user.email;
+            const uid = user.uid; // Firebase UID for identification
+
+            console.log("User signed in with Google:", displayName, email);
+
+            // Save user details to Firestore database
+            const userRef = doc(db, "User", uid); // Use Firebase UID as document ID
+            await setDoc(userRef, {
+                name: displayName,
+                email: email,
+                password: null, // Password is not available for Google Sign-In
+            }, { merge: true }); // Merge ensures existing data isn't overwritten
+
+            // Store user ID in localStorage
+            localStorage.setItem("username", uid);
+
+            // Redirect to main menu
+            window.location.href = "main_menu.html";
+        } catch (error) {
+            console.error("Error during Google Sign-In:", error);
+            alert("Google Sign-In failed. Please try again.");
+        }
+    });
 
   </script>
