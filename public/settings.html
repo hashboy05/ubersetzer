@@ -93,8 +93,11 @@
                 <label class="block text-sm font-medium text-gray-300 mb-1">Confirm New Password</label>
                 <input type="password" id="confirm-new-password" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200">
             </div>
-            <button type="submit" class="w-full bg-primary text-white py-3 !rounded-button hover:bg-primary/90 transition-colors cursor-pointer">Save Changes</button>
+            <button type="submit" id="save-changes-btn" class="w-full bg-primary text-white py-3 !rounded-button hover:bg-primary/90 transition-colors cursor-pointer">Save Changes</button>
         </form>
+        <button id="delete-account-btn" class="w-full bg-red-500 text-white py-3 mt-4 !rounded-button hover:bg-red-600 transition-colors cursor-pointer">
+            Delete Account
+        </button>
     </div>
 </div>
 </body>
@@ -102,9 +105,9 @@
 <script type="module">
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, getDocs, collection, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, getDocs, collection, query, where, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, deleteUser, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
     
@@ -125,9 +128,30 @@
     const analytics = getAnalytics(app);
     // Initialize Cloud Firestore and get a reference to the service
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
     // Check if user is logged in
     const loggedInUser = localStorage.getItem("username");
+
+    const currentPasswordInput = document.getElementById('current-password');
+    const newPasswordInput = document.getElementById('new-password');
+    const confirmNewPasswordInput = document.getElementById('confirm-new-password');
+    const saveChangesBtn = document.getElementById('save-changes-btn');
+
+    function disablePasswordFields() {
+        currentPasswordInput.disabled = true;
+        newPasswordInput.disabled = true;
+        confirmNewPasswordInput.disabled = true;
+        saveChangesBtn.disabled = true;
+    }
+
+    function enablePasswordFields() {
+        currentPasswordInput.disabled = false;
+        newPasswordInput.disabled = false;
+        confirmNewPasswordInput.disabled = false;
+        saveChangesBtn.disabled = false;
+    }
+
     if (loggedInUser) {
         
         const userDocRef = doc(db, "User", loggedInUser);
@@ -137,9 +161,16 @@
                 const userData = docSnapshot.data();
                 const username = userData.name; // Assuming the username field is named 'name'
                 const email = userData.email; // Assuming the email field is named 'email'
+                const password = userData.password;
                 
                 document.getElementById('username').value = username; // Set username field value
                 document.getElementById('email').value = email; // Set email field value
+
+                if (password === null) {
+                    disablePasswordFields();
+                } else {
+                    enablePasswordFields();
+                }
             } else {
                 console.log("No such document!");
                 window.location.href = "login.html"; // Redirect if user document not found
@@ -202,6 +233,45 @@
         } catch (error) {
             console.error("Error updating password:", error);
             alert(username+", "+email+", "+currentPassword+", "+newPassword+", "+confirmNewPassword);
+        }
+    });
+    const deleteAccountBtn = document.getElementById('delete-account-btn');
+    deleteAccountBtn.addEventListener('click', async () => {
+        const confirmDeletion = confirm("Are you sure you want to delete your account? This action cannot be undone.");
+
+        if (!confirmDeletion) return;
+
+        try {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("No authenticated user found. Please log in.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const uid = user.uid;
+
+            // Delete Firestore user document
+            const userDocRef = doc(db, "User", uid);
+            await deleteDoc(userDocRef);
+
+            // Delete Firebase Authentication user
+            await deleteUser(user);
+
+            // Clear localStorage and redirect
+            localStorage.removeItem("username");
+            alert("Account deleted successfully.");
+            window.location.href = "login.html";
+
+        } catch (error) {
+            console.error("Error deleting account:", error);
+            if (error.code === 'auth/requires-recent-login') {
+                alert("You need to re-login before deleting your account.");
+                // Optionally redirect to login page here
+                window.location.href = "login.html";
+            } else {
+                alert("Account deletion failed: " + error.message);
+            }
         }
     });
 </script>

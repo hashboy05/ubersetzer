@@ -69,6 +69,9 @@
     <!-- Page Content -->
     <div class="page-content bg-gray-800/90 backdrop-blur-sm p-8 rounded-xl shadow-lg">
         <h2 class="text-2xl font-semibold text-gray-200 mb-6">Translation History</h2>
+        <button id="delete-all-btn" class="mb-4 bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded">
+            Delete All History
+        </button>
 
         <!-- History Rows -->
         <div id="history-container" class="space-y-4">
@@ -79,7 +82,7 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where, orderBy, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
     
         // Firebase configuration
@@ -99,6 +102,52 @@
     
         // Initialize Cloud Firestore and get a reference to the service
         const db = getFirestore(app);
+
+        const deleteAllBtn = document.getElementById('delete-all-btn');
+
+        async function deleteAllHistoryItems() {
+            if (!confirm("Are you sure you want to delete ALL your translation history? This action cannot be undone.")) {
+                return;
+            }
+
+            try {
+                // Query all documents for the logged-in user
+                const q = query(
+                    collection(db, "Translation History"),
+                    where("UserID", "==", localStorage.getItem("username"))
+                );
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    alert("No history to delete.");
+                    return;
+                }
+
+                // Delete all documents one by one
+                const deletePromises = querySnapshot.docs.map(docSnap => deleteDoc(doc(db, "Translation History", docSnap.id)));
+                await Promise.all(deletePromises);
+
+                alert("All translation history deleted successfully.");
+                fetchHistoryData(); // Refresh UI
+            } catch (error) {
+                console.error("Error deleting all history:", error);
+                alert("Failed to delete all history. Please try again.");
+            }
+        }
+
+        deleteAllBtn.addEventListener('click', deleteAllHistoryItems);
+
+        async function deleteHistoryItem(docId) {
+            try {
+                const docRef = doc(db, "Translation History", docId);
+                await deleteDoc(docRef);
+                fetchHistoryData();
+            } catch (error) {
+                console.error("Error deleting document:", error);
+                alert("Error deleting history item. Please try again.");
+            }
+        }
+
         async function fetchHistoryData() {
             const historyContainer = document.getElementById('history-container');
             historyContainer.innerHTML = '';
@@ -122,6 +171,7 @@
                 for (const userDoc of userDocuments) {
                     // Extract data from each document in Translation History
                     const data = userDoc.data();
+                    const docId = userDoc.id; // Get the document ID
                     const sourceText = data.SourceText;
                     const sourceLangId = data.SourceLang; // Document ID for Source Language
                     const translatedText = data.TranslatedText;
@@ -144,14 +194,25 @@
                     const historyRow = document.createElement('div');
                     historyRow.className = 'history-row';
                     historyRow.innerHTML = `
-                        <h3>Translated on: ${formattedDate}</h3>
-                        <p><strong>Input (${sourceLangName || 'N/A'}):</strong> ${sourceText || 'N/A'}</p>
-                        <p><strong>Output (${translatedLangName || 'N/A'}):</strong> ${translatedText || 'N/A'}</p>
+                        <div>
+                            <h3>Translated on: ${formattedDate}</h3>
+                            <p><strong>Input (${sourceLangName || 'N/A'}):</strong> ${sourceText || 'N/A'}</p>
+                            <p><strong>Output (${translatedLangName || 'N/A'}):</strong> ${translatedText || 'N/A'}</p>
+                        </div>
+                        <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" data-id="${docId}">Delete</button>
                     `;
                     
                     // Append the row to the container
                     historyContainer.appendChild(historyRow);
                 }
+                 // Attach event listeners to delete buttons
+                const deleteButtons = document.querySelectorAll('.history-row button');
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const docId = this.dataset.id;
+                        deleteHistoryItem(docId);
+                    });
+                });
             } catch (e) {
                 console.error("Error fetching translation history:", e);
                 historyContainer.innerHTML = '<p>Error fetching translation history. Please try again later.</p>';
