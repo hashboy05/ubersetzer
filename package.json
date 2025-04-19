@@ -1,5 +1,22 @@
 {
+  "name": "nodejs-getting-started",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "10.x.x"
+  },
   "dependencies": {
-    "firebase": "^11.6.0"
-  }
+    "@vitalets/google-translate-api": "^9.2.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "free-translate": "^0.6.1"
+  },
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
 }
