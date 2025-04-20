@@ -1,6 +1,6 @@
 let recognition;
 
-// for starting microphone
+// start microphone
 function startRecognition() {
     if (!('webkitSpeechRecognition' in window)) {
         alert('Speech recognition not supported in this browser.');
@@ -29,7 +29,7 @@ function startRecognition() {
     recognition.start();
 }
 
-//for stopping microphone
+// stop microphone
 function stopRecognition() {
     if (recognition) {
         recognition.stop();
@@ -38,7 +38,7 @@ function stopRecognition() {
     translateText();
 }
 
-//for swapping input and output languages
+// swap input and output languages
 function swapLanguages() {
     const sourceLang = document.getElementById('sourceLang');
     const targetLang = document.getElementById('targetLang');
@@ -53,7 +53,7 @@ function swapLanguages() {
     document.getElementById('translatedText').value = sourceText;
 }
 
-//for copying the output translation
+// copy the output translation
 function copyTranslation() {
     const translatedText = document.getElementById('translatedText');
     translatedText.select();
@@ -61,7 +61,7 @@ function copyTranslation() {
     alert('Translation copied to clipboard!');
 }
 
-//for clearing the input and output translation
+// clear the textfields
 function clearText() {
     document.getElementById('sourceText').value = '';
     document.getElementById('translatedText').value = '';

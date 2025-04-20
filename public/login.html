@@ -63,21 +63,25 @@
             </div>
         </div>
     </nav>
+    <!-- login fields and buttons -->
     <div class="page-content bg-gray-800/90 backdrop-blur-sm p-8 rounded-xl shadow-lg max-w-md mx-auto">
         <h2 class="text-2xl font-semibold text-gray-200 mb-6">Login</h2>
         <form id="login-form" class="space-y-4">
             <div>
+                <!-- username -->
                 <label for="username" class="block text-sm font-medium text-gray-300 mb-1">Username</label>
                 <input type="text" id="username" name="username" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
             </div>
             <div>
+                <!-- password -->
                 <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
                 <input type="password" id="password" name="password" class="w-full p-3 border border-gray-600 rounded-xl focus:outline-none focus:border-primary bg-gray-700 text-gray-200" required>
             </div>
+            <!-- login button -->
             <button type="submit" id="submitData" class="w-full bg-primary text-white py-3 !rounded-button hover:bg-primary/90 transition-colors cursor-pointer">Login</button>
             <p class="text-center text-gray-400">Don't have an account? <a href="signup.html" class="text-primary hover:underline cursor-pointer">Sign up</a></p>
         </form>
-        <!-- Google Sign-In Button -->
+        <!-- Google Sign-In button -->
         <button id="google-signin-btn" class="w-full bg-red-500 text-white py-3 mt-4 !rounded-button hover:bg-red-600 transition-colors cursor-pointer flex items-center justify-center gap-x-2">
             <i class="ri-google-fill"></i> Continue with Google
         </button>
@@ -113,6 +117,7 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
+    // signing in with different email 
     const loginForm = document.getElementById('login-form');
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -143,7 +148,7 @@
             }
         });
 
-    // Google Sign-In Button Click Event
+    // google email sign-in
     const googleSignInBtn = document.getElementById('google-signin-btn');
     googleSignInBtn.addEventListener('click', async () => {
         const provider = new GoogleAuthProvider();

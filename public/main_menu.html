@@ -66,10 +66,12 @@
 </head>
 <body class="gradient-bg">
 <div class="container mx-auto px-4 py-8 min-h-screen">
+    <!-- navigation bar -->
     <nav class="bg-gray-800/90 backdrop-blur-sm shadow-lg rounded-xl mb-8 p-4">
         <div class="flex items-center justify-between">
             <a href="#" class="font-['Pacifico'] text-2xl text-primary">übersetzer</a>
             <div class="flex gap-4">
+                <a href="main_menu.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Translate</a>
                 <a href="history.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">History</a>
                 <a href="settings.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Settings</a>
                 <button class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer" onclick="logout()">Logout</button>
@@ -78,6 +80,7 @@
     </nav>
 
     <div class="page-content bg-gray-800/90 backdrop-blur-sm p-8 rounded-xl shadow-lg">
+        <!-- language options -->
         <div class="flex items-center gap-4 mb-6">
             <div class="flex-1">
                 <select id="sourceLang" class="custom-select w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-gray-200" onchange="toggleMicButton()">
@@ -92,6 +95,7 @@
                 </select>
             </div>
         </div>
+        <!-- translation fields -->
         <div class="space-y-6">
             <div class="relative">
                 <textarea id="sourceText" class="w-full h-40 p-4 bg-gray-700 border border-gray-600 rounded-xl resize-none focus:outline-none focus:border-primary text-gray-200" placeholder="Enter text to translate"></textarea>
@@ -138,6 +142,7 @@
         // Initialize Cloud Firestore and get a reference to the service
         const db = getFirestore(app);
 
+        // retrieves available languages from the database
         async function populateLanguageDropdown() {
             const languageSourceDropdown = document.getElementById("sourceLang");
             const languageTargetDropdown = document.getElementById("targetLang");
@@ -224,6 +229,7 @@
         }
         window.translateText = translateText;
         
+        // clear the textfields
         function clearText() {
             document.getElementById('sourceText').value = '';
             document.getElementById('translatedText').value = '';
@@ -238,7 +244,7 @@
             };
         }
         
-        //for swapping input and output languages
+        // swap input and output languages
         function swapLanguages() {
             const sourceLang = document.getElementById('sourceLang');
             const targetLang = document.getElementById('targetLang');
@@ -253,7 +259,7 @@
             document.getElementById('translatedText').value = sourceText;
         }
     
-        //for copying the output translation
+        // copy the output translation
         function copyTranslation() {
             const translatedText = document.getElementById('translatedText');
             translatedText.select();
@@ -272,7 +278,7 @@
     </script>
 
     <script>
-        //for reading out the translation, also useful for blind people
+        // read out the translation, also useful for blind people
         function readTranslation() {
             const translatedText = document.getElementById('translatedText').value;
         
@@ -292,7 +298,7 @@
             // Speak the text
             window.speechSynthesis.speak(utterance);
         }
-        //if the input language is auto detect, then the voice input won't be available, otherwise it will be
+        // if the input language is auto detect, then the voice input won't be available, otherwise it will be
         function toggleMicButton() {
             const sourceLang = document.getElementById('sourceLang').value;
             const micButton = document.getElementById('micButton');

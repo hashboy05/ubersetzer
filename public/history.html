@@ -54,12 +54,13 @@
 </head>
 <body class="gradient-bg">
 <div class="container mx-auto px-4 py-8 min-h-screen">
-    <!-- Navigation Bar -->
+    <!-- navigation bar -->
     <nav class="bg-gray-800/90 backdrop-blur-sm shadow-lg rounded-xl mb-8 p-4">
         <div class="flex items-center justify-between">
             <a href="#" class="font-['Pacifico'] text-2xl text-primary">übersetzer</a>
             <div class="flex gap-4">
                 <a href="main_menu.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Translate</a>
+                <a href="history.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">History</a>
                 <a href="settings.html" class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer">Settings</a>
                 <button class="nav-btn !rounded-button px-4 py-2 text-gray-300 hover:text-primary cursor-pointer" onclick="logout()">Logout</button>
             </div>
@@ -105,6 +106,7 @@
 
         const deleteAllBtn = document.getElementById('delete-all-btn');
 
+        // delete all the translations made by the user
         async function deleteAllHistoryItems() {
             if (!confirm("Are you sure you want to delete ALL your translation history? This action cannot be undone.")) {
                 return;
@@ -137,6 +139,7 @@
 
         deleteAllBtn.addEventListener('click', deleteAllHistoryItems);
 
+        // delete specific translation made by the user
         async function deleteHistoryItem(docId) {
             try {
                 const docRef = doc(db, "Translation History", docId);
@@ -148,6 +151,7 @@
             }
         }
 
+        // display the past translations made
         async function fetchHistoryData() {
             const historyContainer = document.getElementById('history-container');
             historyContainer.innerHTML = '';
