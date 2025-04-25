@@ -94,7 +94,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
     import { getFirestore, doc, getDocs, setDoc, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
   
@@ -119,40 +119,51 @@
 
     // signing in with different email 
     const loginForm = document.getElementById('login-form');
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-      
-            const q = query(collection(db, "User"), where("name", "==", name), where("password", "==", password));
-      
-            try {
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    let userId;
-                    querySnapshot.forEach((doc) => {
-                        userId = doc.id; // Get the document ID (which is the user ID)
-                    });
-
-                    // Store the user ID in localStorage
-                    localStorage.setItem("username",userId);
-                    //user exists and credentials match
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+  
+        const q = query(collection(db, "User"), where("name", "==", name));
+  
+        try {
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                // Get email from Firestore using username
+                let userEmail;
+                querySnapshot.forEach((doc) => {
+                    userEmail = doc.data().email;
+                });
+                // Sign in with Firebase Authentication
+                signInWithEmailAndPassword(auth, userEmail, password)
+                .then((userCredential) => {
+                    // Signed in
+                    const user = userCredential.user;
+                    // Set cookie
+                    document.cookie = `sessionToken=${user.uid}; path=/; max-age=3600`;
+                    // Redirect to main menu
                     window.location.href = "main_menu.html";
-                } else {
-                    //user not found or invalid credentials
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
                     alert("Invalid username or password.");
-                }
-            } catch (error) {
-                console.error("Error during login:", error);
-                alert("Login failed. Please try again.");
+                });
+            } else {
+                //user not found or invalid credentials
+                alert("Invalid username or password.");
             }
-        });
+        } catch (error) {
+            console.error("Error during login:", error);
+            alert("Login failed. Please try again.");
+        }
+    });
 
     // google email sign-in
     const googleSignInBtn = document.getElementById('google-signin-btn');
     googleSignInBtn.addEventListener('click', async () => {
         const provider = new GoogleAuthProvider();
-        
+    
         try {
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
@@ -169,12 +180,10 @@
             await setDoc(userRef, {
                 name: displayName,
                 email: email,
-                password: null, // Password is not available for Google Sign-In
             }, { merge: true }); // Merge ensures existing data isn't overwritten
 
-            // Store user ID in localStorage
-            localStorage.setItem("username", uid);
-
+            // Set cookie
+            document.cookie = `sessionToken=${user.uid}; path=/; max-age=3600`;
             // Redirect to main menu
             window.location.href = "main_menu.html";
         } catch (error) {
@@ -182,5 +191,4 @@
             alert("Google Sign-In failed. Please try again.");
         }
     });
-
   </script>

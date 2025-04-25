@@ -51,11 +51,6 @@
                 }
             }
         }
-        // Logout function
-        function logout() {
-            localStorage.removeItem("username");
-            window.location.href = "login.html";
-        }
     </script>
 </head>
 <body class="gradient-bg">
@@ -117,7 +112,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
     import { getFirestore, doc, getDoc, getDocs, collection, query, where, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
-    import { getAuth, onAuthStateChanged, deleteUser, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, deleteUser, reauthenticateWithCredential, EmailAuthProvider, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
     
@@ -140,8 +135,51 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Check if user is logged in
-    const loggedInUser = localStorage.getItem("username");
+    let user = null; // Declare user variable
+
+    // Use onAuthStateChanged to reliably get the user object
+    onAuthStateChanged(auth, (currentUser) => {
+        if (currentUser) {
+            // User is signed in
+            user = currentUser; // Set the user variable
+            console.log("User is signed in:", user.uid);
+
+            // gets the existing user from the database
+            const userDocRef = doc(db, "User", user.uid);
+            getDoc(userDocRef)
+            .then((docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    const userData = docSnapshot.data();
+                    const username = userData.name; // Assuming the username field is named 'name'
+                    const email = userData.email; // Assuming the email field is named 'email'
+                    
+                    document.getElementById('username').value = username; // Set username field value
+                    document.getElementById('email').value = email; // Set email field value
+
+                    // Check authentication providers
+                    const isEmailUser = user.providerData.some(provider => provider.providerId === 'password');
+
+                    if (isEmailUser) {
+                        enablePasswordFields();
+                    } else {
+                        disablePasswordFields();
+                    }
+                } else {
+                    console.log("No such document!");
+                    // window.location.href = "login.html"; // Redirect if user document not found
+                }
+            })
+            .catch((error) => {
+                console.log("Error getting document:", error);
+                // window.location.href = "login.html"; // Redirect on error
+            });
+            // Perform any actions that require the user object here
+        } else {
+            // No user is signed in
+            user = null; // Set user to null when signed out
+            console.log("No user is signed in");
+        }
+    });
 
     const currentPasswordInput = document.getElementById('current-password');
     const newPasswordInput = document.getElementById('new-password');
@@ -164,37 +202,16 @@
         saveChangesBtn.disabled = false;
     }
 
-    if (loggedInUser) {
-        
-        // gets the existing user from the database
-        const userDocRef = doc(db, "User", loggedInUser);
-        getDoc(userDocRef)
-        .then((docSnapshot) => {
-            if (docSnapshot.exists()) {
-                const userData = docSnapshot.data();
-                const username = userData.name; // Assuming the username field is named 'name'
-                const email = userData.email; // Assuming the email field is named 'email'
-                const password = userData.password;
-                
-                document.getElementById('username').value = username; // Set username field value
-                document.getElementById('email').value = email; // Set email field value
-
-                if (password === null) {
-                    disablePasswordFields();
-                } else {
-                    enablePasswordFields();
-                }
-            } else {
-                console.log("No such document!");
-                window.location.href = "login.html"; // Redirect if user document not found
-            }
-        })
-        .catch((error) => {
-            console.log("Error getting document:", error);
-            window.location.href = "login.html"; // Redirect on error
+    window.logout = function() {
+        signOut(auth).then(() => {
+            // Sign-out successful.
+            document.cookie = "sessionToken=; path=/; Expires=Thu, 01 Jan 2070 00:00:01 GMT;"; // Clear cookie
+            window.location.href = "login.html";
+        }).catch((error) => {
+            // An error happened.
+            console.error("Sign out error", error);
+            alert("Logout failed. Please try again.");
         });
-    } else {
-        window.location.href = "login.html";
     }
                
     // change password in the database
@@ -205,48 +222,27 @@
         const currentPassword = document.getElementById('current-password').value;
         const newPassword = document.getElementById('new-password').value;
         const confirmNewPassword = document.getElementById('confirm-new-password').value;
-
-        // Get the username and email from the form (assuming these are displayed and not editable)
-        const username = document.getElementById('username').value;
         const email = document.getElementById('email').value;
 
-        // 1. Verify Current Password
-        const q = query(collection(db, "User"), where("name", "==", username), where("password", "==", currentPassword));
+        // 1. Verify that New Password matches the confirmed Password
+        if (newPassword !== confirmNewPassword) {
+            alert("New password and confirm password do not match. Please try again.");
+            return;
+        }
 
         try {
-            const querySnapshot = await getDocs(q);
+            // Reauthenticate user
+            const credential = EmailAuthProvider.credential(email, currentPassword);
+            await reauthenticateWithCredential(auth.currentUser, credential);
 
-            if (querySnapshot.empty) {
-                alert("Incorrect current password. Please try again.");
-                return;
-            }
-
-            // 2. Check if New Password and Confirm Password Match
-            if (newPassword !== confirmNewPassword) {
-                alert("New password and confirm password do not match. Please try again.");
-                return;
-            }
-
-            // 3. Update Password
-            let userDocId;
-            querySnapshot.forEach((doc) => {
-                userDocId = doc.id; // Capture the document ID
-            });
-
-            if (userDocId) {
-                const userDocRef = doc(db, "User", userDocId);
-
-                await updateDoc(userDocRef, {
-                    password: newPassword  // Update the password
-                });
-                alert("Password updated successfully!");
-            } else {
-                alert("User document not found. Please try again.");
-            }
+            // Update password
+            await updatePassword(auth.currentUser, newPassword);
+            alert("Password updated successfully!");
 
         } catch (error) {
             console.error("Error updating password:", error);
-            alert(username+", "+email+", "+currentPassword+", "+newPassword+", "+confirmNewPassword);
+            alert("Incorrect current password or an error occurred. Please try again." + error.message);
+
         }
     });
 
@@ -273,9 +269,9 @@
 
             // Delete Firebase Authentication user
             await deleteUser(user);
+            // Clear the sessionToken cookie on successful account deletion
+            document.cookie = "sessionToken=; path=/; Expires=Thu, 01 Jan 2070 00:00:01 GMT;";
 
-            // Clear localStorage and redirect
-            localStorage.removeItem("username");
             alert("Account deleted successfully.");
             window.location.href = "login.html";
 

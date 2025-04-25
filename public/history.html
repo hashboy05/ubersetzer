@@ -38,19 +38,6 @@
             color: #e2e8f0; /* Text color */
         }
     </style>
-    <script>
-        // Check if user is logged in
-        const loggedInUser = localStorage.getItem("username");
-        if (!loggedInUser) {
-            window.location.href = "login.html";
-        }
-
-        // Logout function
-        function logout() {
-            localStorage.removeItem("username");
-            window.location.href = "login.html";
-        }
-    </script>
 </head>
 <body class="gradient-bg">
 <div class="container mx-auto px-4 py-8 min-h-screen">
@@ -85,6 +72,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where, orderBy, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
     
         // Firebase configuration
         const firebaseConfig = {
@@ -103,6 +91,23 @@
     
         // Initialize Cloud Firestore and get a reference to the service
         const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let user = null; // Declare user variable
+
+        // Use onAuthStateChanged to reliably get the user object
+        onAuthStateChanged(auth, (currentUser) => {
+            if (currentUser) {
+                // User is signed in
+                user = currentUser; // Set the user variable
+                console.log("User is signed in:", user.uid);
+                // Perform any actions that require the user object here
+            } else {
+                // No user is signed in
+                user = null; // Set user to null when signed out
+                console.log("No user is signed in");
+            }
+        });
 
         const deleteAllBtn = document.getElementById('delete-all-btn');
 
@@ -116,7 +121,7 @@
                 // Query all documents for the logged-in user
                 const q = query(
                     collection(db, "Translation History"),
-                    where("UserID", "==", localStorage.getItem("username"))
+                    where("UserID", "==", user.uid)
                 );
                 const querySnapshot = await getDocs(q);
 
@@ -169,7 +174,8 @@
                 // Filter documents based on UserID
                 const userDocuments = querySnapshot.docs.filter((doc) => {
                     const data = doc.data();
-                    return data.UserID === localStorage.getItem("username");
+                    return data.UserID === user.uid;
+                    // return data.UserID === localStorage.getItem("username");
                 });
 
                 for (const userDoc of userDocuments) {
@@ -224,6 +230,19 @@
         }
         // Fetch data when the page loads
         document.addEventListener('DOMContentLoaded', fetchHistoryData);
+        
+
+        window.logout = function() {
+            signOut(auth).then(() => {
+                // Sign-out successful.
+                document.cookie = "sessionToken=; path=/; Expires=Thu, 01 Jan 2070 00:00:01 GMT;"; // Clear cookie
+                window.location.href = "login.html";
+            }).catch((error) => {
+                // An error happened.
+                console.error("Sign out error", error);
+                alert("Logout failed. Please try again.");
+            });
+        }
     </script>
 </div>
 </body>

@@ -4,6 +4,14 @@ const path = require('path');
 const translator = require('@vitalets/google-translate-api');
 
 const server = http.createServer((req, res) => {
+  // Extract Session Token from Cookie (if available)
+  const cookies = req.headers.cookie ? req.headers.cookie.split(';').map(c => c.trim()).reduce((acc, cookie) => {
+      const [key, value] = cookie.split('=').map(decodeURIComponent);
+      acc[key] = value;
+      return acc;
+  }, {}) : {};
+  const sessionToken = cookies.sessionToken;
+
   if (req.method === 'POST' && req.url === '/translate') {
     let body = '';
     req.on('data', chunk => { body += chunk; });
@@ -22,9 +30,32 @@ const server = http.createServer((req, res) => {
       }
     });
   } else {
+    // Redirect root URL based on sessionToken presence
+    if (req.url === '/') {
+      if (sessionToken) {
+        // Existing user with sessionToken -> redirect to main_menu.html
+        res.writeHead(302, { 'Location': '/main_menu.html' });
+        res.end();
+        return;
+      } else {
+        // New user or no sessionToken -> redirect to login.html
+        res.writeHead(302, { 'Location': '/login.html' });
+        res.end();
+        return;
+      }
+    }
+
+    // Protected Route Check for main_menu.html
+    if (req.url === '/main_menu.html' && !sessionToken) {
+      res.writeHead(302, { 'Location': '/login.html' });
+      res.end();
+      return;
+    }
+
     // Serve static files (very basic)
-    let filePath = './public' + (req.url === '/' ? '/login.html' : req.url);
+    let filePath = './public' + req.url;
     let extname = path.extname(filePath);
+
     fs.readFile(filePath, function(error, content) {
       if (error) {
         res.writeHead(404);

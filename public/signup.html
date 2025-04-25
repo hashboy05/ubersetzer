@@ -110,7 +110,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
     import { getFirestore, setDoc, addDoc, doc, collection, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
   
@@ -149,14 +149,12 @@
             await setDoc(doc(db, "User", user.uid), {
                 name: name,
                 email: email,
-                password: password,
             });
+            // Set cookie
+            document.cookie = `sessionToken=${user.uid}; path=/; max-age=3600`;
 
             console.log("User signed up:", user.uid, name, email);
             alert("Sign up successful!");
-
-            // Set localStorage username to user's ID
-            localStorage.setItem("username", user.uid);
 
             // Redirect to main menu
             window.location.href = "main_menu.html";
@@ -179,14 +177,13 @@
             await setDoc(doc(db, "User", user.uid), {
                 name: user.displayName,
                 email: user.email,
-                password: null, // No password for Google sign-in
             });
+
+            // Set cookie
+            document.cookie = `sessionToken=${user.uid}; path=/; max-age=3600`;
 
             console.log("User signed in with Google:", user.displayName, user.email);
             alert("Sign up with Google successful!");
-
-            // Set localStorage username to user's ID
-            localStorage.setItem("username", user.uid);
 
             // Redirect to main menu
             window.location.href = "main_menu.html";
@@ -195,5 +192,4 @@
             alert("Google Sign-In failed. Please try again.");
         }
     });
-
 </script>
