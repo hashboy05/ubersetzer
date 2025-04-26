@@ -188,7 +188,7 @@
             }
         }
 
-        // Function to translate text
+        // Translate function using Google Cloud Translation API
         async function translateText() {
             const sourceText = document.getElementById('sourceText').value;
             const sourceLang = document.getElementById('sourceLang').value;
@@ -199,37 +199,54 @@
                 translatedTextElement.value = '';
                 return;
             }
-    
+
+            const API_KEY = 'AIzaSyBRS0boBstznFCvKQg2htgKfwftwAIhOr4';
+
             try {
-                const response = await fetch('/translate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text: sourceText,
-                        source_lang: sourceLang === 'auto' ? 'auto' : sourceLang,
-                        target_lang: targetLang
-                    })
+                const apiUrl = `https://translation.googleapis.com/language/translate/v2?key=${API_KEY}`;
+                const requestBody = JSON.stringify({
+                    q: sourceText,
+                    target: targetLang,
+                    source: sourceLang === 'auto' ? '' : sourceLang, // Google Translate API doesn't need "auto"
+                    format: 'text'
                 });
-    
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: requestBody
+                });
+
                 const data = await response.json();
-                if (data.status === 'success') {
-                    const translatedText = data.translation;
-                    translatedTextElement.value = translatedText;
+
+                if (data.error) {
+                    console.error('Google Translate API error:', data.error);
+                    alert(`Translation failed: ${data.error.message}`);
+                    translatedTextElement.value = '';
+                    return;
+                }
+
+                const translatedText = data.data.translations[0].translatedText;
+                translatedTextElement.value = translatedText;
     
-                    // Save to Translation History
+                // Save to Translation History
+                if (user) {
                     await addDoc(collection(db, "Translation History"), {
                         UserID: user.uid,
                         SourceText: sourceText,
                         SourceLang: sourceLang,
                         TranslatedText: translatedText,
                         TranslatedLang: targetLang,
-                        Timestamp: new Date(),
+                        Timestamp: new Date()
                     });
                     console.log('Translation saved to history');
                 } else {
-                    throw new Error(data.error);
+                    console.log('User not signed in. Translation not saved to history.');
                 }
             } catch (error) {
+                console.error('Error during translation:', error);
                 alert(`Translation failed: ${error.message}`);
                 translatedTextElement.value = '';
             }
