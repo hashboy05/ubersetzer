@@ -107,15 +107,7 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
     
         // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDdKTr-ahasjXtJ00tnWiC5nLlX4XeO8lk",
-            authDomain: "ubersetzer-2c32a.firebaseapp.com",
-            projectId: "ubersetzer-2c32a",
-            storageBucket: "ubersetzer-2c32a.firebasestorage.app",
-            messagingSenderId: "948107684665",
-            appId: "1:948107684665:web:6495565ecab6df2b9b16e8",
-            measurementId: "G-EBCPHND0TL"
-        };
+        const firebaseConfig = __FIREBASE_CONFIG__;
     
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -132,7 +124,6 @@
             if (currentUser) {
                 // User is signed in
                 user = currentUser; // Set the user variable
-                console.log("User is signed in:", user.uid);
                 // Perform any actions that require the user object here
             } else {
                 // No user is signed in
